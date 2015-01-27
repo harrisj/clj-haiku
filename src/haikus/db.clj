@@ -4,29 +4,31 @@
     [clojure.java.io :as io]
     [yesql.core :refer [defquery defqueries]]))
 
-(def db-name "haiku.db")
 
-(def db-spec {:classname "org.sqlite.JDBC"
-              :subprotocol "sqlite"
-              :subname db-name})
+(def ^:dynamic *db-name* "haiku.db")
+
+(def ^:dynamic *db-spec* {:classname "org.sqlite.JDBC"
+                          :subprotocol "sqlite"
+                          :subname *db-name*})
 
 (defn- exec-create-query
   [sym]
   (do
     (println "Running " sym)
-    (eval (sym db-spec))
+    (eval (sym *db-spec*))
   )
 )
 
 (defn delete-db
   []
-  (io/delete-file db-name)
+  (io/delete-file *db-name*)
 )
 
 (defn create-db
   "Creates the database from scratch"
   []
   (let [queries (defqueries "sql/create.sql")]
+    (println "Creating" *db-name*)
     (map exec-create-query queries)
   )
 )
@@ -56,33 +58,56 @@
   "Add or updates a term in the DB; if a prior version of the term is in the DB with a different count, set varies to true"
   ([term syllables from-cmu]
     (do
-       (db-add-term! db-spec term syllables from-cmu)
-       (db-set-varies-for-term! db-spec term syllables)
-       (db-remove-term-from-misses! db-spec term)
+       (db-add-term! *db-spec* (str/upper-case term) syllables from-cmu)
+       (db-set-varies-for-term! *db-spec* (str/upper-case term) syllables)
+       (db-remove-term-from-misses! *db-spec* (str/upper-case term))
     ))
   ([term syllables] (add-term term syllables false))
 )
 
+(defn find-term
+  "Looks up a term in the DB and returns a syllable count if found or false if not"
+  [term]
+  (let [result (db-lookup-term *db-spec* (str/upper-case term))]
+    (if (not-empty result)
+      (get (first result) :syllables)
+      (do
+        (println "MISS")
+        (db-add-term-to-misses! *db-spec* (str/upper-case term))
+        false
+      )
+    )
+  )
+)
+
+(defn find-term-miss
+  "Looks up a term in the DB and returns a miss count if found or false if not"
+  [term]
+  (let [result (db-lookup-term-miss *db-spec* (str/upper-case term))]
+    (if (not-empty result)
+      (get (first result) :miss_count)
+      false
+    )
+  )
+)
+
+
 (defn load-cmu-dict-into-db
   []
-  (do
-    (println "Loading initial dictionary. This might take a while...")
-    (map (fn [[term phonetic]]
-         (if (re-find #"\(\d+\)$" term)
-           (let [canonical-term (str/replace term #"\(\d+\)$" "")]
-             (add-term canonical-term (cmu-syllable-count phonetic))
-           )
-           (add-term term (cmu-syllable-count phonetic) true)
-          )) raw-cmu-terms)
-    )
+  (println "Loading initial dictionary. This might take a while...")
+  (map (fn [[term phonetic]]
+       (if (re-find #"\(\d+\)$" term)
+         (let [canonical-term (str/replace term #"\(\d+\)$" "")]
+           (add-term canonical-term (cmu-syllable-count phonetic))
+         )
+         (add-term term (cmu-syllable-count phonetic) true)
+        )) raw-cmu-terms)
 )
 
 (defn initialize-db
   []
-  (do
-     (create-db)
-     (load-cmu-dict-into-db)
-  )
+  (create-db)
+  (load-cmu-dict-into-db)
 )
 
 ;; not needed for now

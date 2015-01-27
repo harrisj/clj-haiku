@@ -1,14 +1,10 @@
 -- name: create-terms!
 -- Tracks the syllable counts for each term
-CREATE TABLE "terms" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "term" varchar(255), "syllables" integer, "cmu_dict" boolean DEFAULT 'f' NOT NULL, "syllable_count_varies" boolean DEFAULT 'f' NOT NULL);
-
--- name: create-terms-index-1!
--- An index on the terms table
-CREATE UNIQUE INDEX "index_terms_on_term" ON "terms" ("term");
+CREATE TABLE "terms" ("term" varchar(255) PRIMARY KEY NOT NULL COLLATE NOCASE, "syllables" integer, "cmu_dict" boolean DEFAULT 'f' NOT NULL, "syllable_count_varies" boolean DEFAULT 'f' NOT NULL);
 
 -- name: create-term-misses!
 -- A table for tracking misses against the terms table. We can use this to find key terms to add later
-CREATE TABLE "term_misses" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "term" varchar(255), "miss_count" integer);
+CREATE TABLE "term_misses" ("term" varchar(255) PRIMARY KEY NOT NULL COLLATE NOCASE, "miss_count" integer);
 
 -- name: create-term-misses-index-1!
 -- An index of term misses by term
