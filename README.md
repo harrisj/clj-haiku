@@ -2,6 +2,13 @@
 
 A learning project to find haikus in Clojure
 
+## What I've Learned Thus Far
+
+* Side-effects and lazy evaluation don't mix. Wrap in a `doall` first.
+* ActiveRecord-style libraries like korma have been deprecated in favor of fast SQL wrappers like Yessql
+* The Lobos library provides DB migrations if I needed them
+* [Environ](https://github.com/weavejester/environ) seems to be the simplest way how to handle environment-specific DB settins
+
 ## Installation
 
 Download from http://example.com/FIXME.
