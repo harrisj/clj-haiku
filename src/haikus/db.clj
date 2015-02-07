@@ -12,14 +12,11 @@
 (defn- exec-create-query
   [db-spec sym]
   (do
-    (eval (sym db-spec))
-  )
-)
+    (eval (sym db-spec))))
 
 (defn delete-db
   [db-spec]
-  (io/delete-file (db-name db-spec) true)
-)
+  (io/delete-file (db-name db-spec) true))
 
 (defn create-db
   "Creates the database from scratch"
@@ -61,11 +58,7 @@
       (get (first result) :syllables)
       (do
         (db-add-term-to-misses! db-spec (str/upper-case term))
-        false
-      )
-    )
-  )
-)
+        false))))
 
 (defn find-term-miss
   "Looks up a term in the DB and returns a miss count if found or false if not"
@@ -73,10 +66,7 @@
   (let [result (db-lookup-term-miss db-spec (str/upper-case term))]
     (if (seq result)
       (get (first result) :miss_count)
-      false
-    )
-  )
-)
+      false)))
 
 
 (defn load-cmu-dict-into-db
@@ -87,32 +77,10 @@
          (let [canonical-term (str/replace term #"\(\d+\)$" "")]
            (add-term canonical-term (cmu-syllable-count phonetic))
          )
-         (add-term db-spec term (cmu-syllable-count phonetic) true)
-        )) raw-cmu-terms))
-)
+         (add-term db-spec term (cmu-syllable-count phonetic) true)))
+          raw-cmu-terms)))
 
 (defn initialize-db
   [db-spec]
   (create-db db-spec)
-  (load-cmu-dict-into-db db-spec)
-)
-
-;; not needed for now
-;;(comment (defn cmu-terms-to-map
-;;  [cmu-terms]
-;;  (let [out {}]
-;;    (into out
-;;       (map (fn [[term phonetic]]
-;;                (if (re-find #"\(\d+\)$" term)
-;;                  ;; check if syllable count different from prior entry for alternate(1) cmu temrs
-;;                  (let [canonical-term (str/replace term #"\(\d+\)$" "")
-;;                        scount (cmu-syllable-count phonetic)]
-;;                    (if-let [prior (get out canonical-term)]
-;;                      (let [prior-scount (:count prior)
-;;                            ;; do we already have varies set to true
-;;                            varies (or (:varies prior) (not= (prior-scount scount)))]
-;;                        (vector canonical-term {:term canonical-term :count scount :varies varies}))
-;;                      (vector canonical-term {:term canonical-term :count scount :varies false})))
-;;                  (vector term {:term term :count (cmu-syllable-count phonetic) :varies false})))
-;;            cmu-terms)))))
-;;
+  (load-cmu-dict-into-db db-spec))
