@@ -41,7 +41,7 @@
 
 ;; Adding a miss to term should remove it from misses
 (expect (more-> false (find-term "robotics")
-                nil (add-term "robotics" 3)
+                nil? (add-term "robotics" 3)
                 3 (find-term "robotics")
                 false (find-term-miss "robotics")))
 
