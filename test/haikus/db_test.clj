@@ -5,12 +5,12 @@
 (def test-db-spec {:classname "org.sqlite.JDBC" :subprotocol "sqlite" :subname "haiku_test.db"})
 
 (defn setup-db []
-  (delete-db test-db-spec)
-  (create-db test-db-spec)
-  (add-term test-db-spec "robot" 2))
+  (delete-db)
+  (create-db)
+  (add-term "robot" 2))
 
 (defn teardown-db []
-  (delete-db test-db-spec))
+  (comment delete-db test-db-spec))
 
 (defn in-context
   "setup and teardown the test DB first"
@@ -28,7 +28,7 @@
 (expect 2 (find-term "robot"))
 
 ;; On a miss, should return false and also not be in 
-(expect (more->> false find-term
+(expect (more-> false find-term
                  1     find-term-miss)
         "robotics")
 
