@@ -38,9 +38,9 @@
 (defn normalized-term
   "Normalizes the term for checking in the DB"
   [term]
-  (str/upper-case (str/replace term #"[\.!?;,]$" "")))
+  (str/upper-case (str/replace term #"[^\w\d]$" "")))
 
-(defn- find-term-or-throw
+(defn find-term-or-throw
   "Looks up the term in the DB. Otherwise, it throws an exception"
   [term]
   (let [normalized (normalized-term term)] 
