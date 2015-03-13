@@ -33,20 +33,15 @@
         "robotics")
 
 
-(comment (deftest find-term-test
-   (add-term test-db-spec "robot" 2)
-   (testing "Lookup for a term in the DB"
-     (is (= 2 )))
-   (testing "Lookup for a term not in the DB should add to term miss"
-     (is (= false ))
-     (is (= 1 )))
-   (testing "Lookup for each term not in the DB should increment misses"
-     (is (= 1 (find-term-miss test-db-spec "robotics")))
-     (is (= false (find-term test-db-spec "robotics")))
-     (is (= false (find-term test-db-spec "robotics")))
-     (is (= 3 (find-term-miss test-db-spec "robotics"))))
-   (testing "Adding a miss to the terms should remove it from misses"
-     (is (= false (find-term test-db-spec "robotics")))
-     (add-term test-db-spec "robotics" 3)
-     (is (= 3 (find-term test-db-spec "robotics")))
-     (is (= false (find-term-miss test-db-spec "robotics"))))))
+;; Should increment misses
+(expect (more-> 1 (find-term-miss "robotics")
+                false (find-term "robotics")
+                false (find-term "robotics")
+                3  (find-term-miss "robotics")))
+
+;; Adding a miss to term should remove it from misses
+(expect (more-> false (find-term "robotics")
+                nil (add-term "robotics" 3)
+                3 (find-term "robotics")
+                false (find-term-miss "robotics")))
+

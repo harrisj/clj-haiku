@@ -22,7 +22,7 @@
   "Creates the database from scratch"
   []
   (let [queries (defqueries "sql/create.sql")]
-    (println "Creating" (db-name))
+    (comment println "Creating" (db-name))
     (doall (map exec-create-query queries))))
 
 (defn- single-cmu-term
